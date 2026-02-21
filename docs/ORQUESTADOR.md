@@ -1,7 +1,7 @@
 # 🧠 Anti-Gravity Orchestrator — Estado del Ecosistema
 
-> **Última actualización**: 2026-02-21 10:12
-> **Actualizado por**: Anti-Gravity (fix identidad Matrix: models.json contaminado + config keys inválidos)
+> **Última actualización**: 2026-02-21 11:36
+> **Actualizado por**: Anti-Gravity (GitHub sync: ambos repos sincronizados, workflow creado, sistema redacción)
 
 Este documento es la **fuente de verdad central** del ecosistema Anti-Gravity + Maya.
 Cualquier sesión de cualquier modelo de IA debe leer este documento antes de hacer cambios.
@@ -296,6 +296,14 @@ systemctl stop claude-proxy && sleep 2 && systemctl start claude-proxy
 | `reverse-engineering-videos` | `~/.agent/skills/reverse-engineering-videos/SKILL.md` | Ingeniería inversa de vídeos |
 | `writing-plans` | `~/.agent/skills/writing-plans/SKILL.md` | Planes de escritura |
 
+### Workflows Anti-Gravity
+
+| Workflow | Archivo | Función |
+|----------|---------|---------| 
+| `/github-sync` | `~/maya/.agent/workflows/github-sync.md` | Sincronizar docs con GitHub (ambos repos) |
+| `/learn-from-errors` | `~/maya/.agent/workflows/learn-from-errors.md` | Consultar error-journal antes de tareas complejas |
+| `/log-error` | `~/maya/.agent/workflows/log-error.md` | Registrar error/lección en error-journal |
+
 ---
 
 ## 8. Handoff (Comunicación Asíncrona)
@@ -415,6 +423,10 @@ Maya tiene personalidad calibrada: respuestas directas, brevedad, humor natural,
 | 2026-02-21 | **Fix config inválida Matrix** — Eliminados keys no reconocidos en `agents.list[1].subagents` (`maxConcurrent`, `archiveAfterMinutes`). Causaban que cada config reload fallara | openclaw.json | ✅ |
 | 2026-02-21 | **Fix identidad Matrix (CAUSA RAÍZ)** — `models.json` del worker contenía TODOS los modelos de Maya (claude-max, opus, sonnet, haiku, antigravity). Kimi K2.5 veía "Claude Opus 4.6" en su catálogo y se identificaba como Maya. **Reescrito para solo contener Kimi K2.5** | VPS agents/worker/agent/models.json | ✅ |
 | 2026-02-21 | **Limpieza workspace-worker** — Eliminados memory files viejos copiados de Maya (2026-02-12, 2026-02-13) y directorio backup/ que reforzaban confusión de identidad. Limpiadas 16 sesiones stale | VPS workspace-worker | ✅ |
+| 2026-02-21 | **Workflow `/github-sync` creado** — Proceso completo para sincronizar docs con GitHub: redacción de credenciales, push a repos, troubleshooting. Soporta push a ambos repos, solo Charly103, o solo Maya | `~/.agent/workflows/github-sync.md` | ✅ |
+| 2026-02-21 | **GitHub Maya (`deepwbmayamatrix-ai/Maya`) inicializado** — Repo vacío inicializado con ORQUESTADOR.md (redactado) + error-journal.md completo (25 entradas). Token: `/data/.openclaw/workspace/data/.github_token` | GitHub | ✅ |
+| 2026-02-21 | **GitHub Charly (`Charly103/maya-agent-army`) actualizado** — ORQUESTADOR.md redactado (503 líneas), error-journal.md (282 líneas), agent identity files (Maya SOUL + Matrix SOUL/IDENTITY/AGENTS/MEMORY). Todo sin credenciales | GitHub | ✅ |
+| 2026-02-21 | **Sistema de redacción seguro** — `~/maya/.redact-rules.sed` contiene reglas de sustitución de credenciales. ORQUESTADOR redactado se genera con `sed -f`. Verificación post-redacción con grep. Ningún token/key/phone expuesto en repos | Local | ✅ |
 
 ---
 
@@ -496,6 +508,28 @@ Matrix ejecuta → reporta en grupo → Maya resume a Charly
 | n8n | `127.0.0.1:5678` | ✅ Activo |
 | Traefik | 80/443 | ✅ Activo |
 | PostgreSQL | 5432 | 🔒 Interno |
+
+---
+
+---
+
+## 15. GitHub — Repositorios del Ecosistema
+
+| Repo | Owner | Contenido | Privado |
+|------|-------|-----------|--------|
+| [`maya-agent-army`](https://github.com/Charly103/maya-agent-army) | `Charly103` | Docs completos + agent identity files | Sí |
+| [`Maya`](https://github.com/deepwbmayamatrix-ai/Maya) | `deepwbmayamatrix-ai` | ORQUESTADOR + error-journal | No |
+
+### Cuentas GitHub
+| Cuenta | Rol | Token |
+|--------|-----|-------|
+| `Charly103` | Personal de Charly | Pedir a Charly si se necesita |
+| `deepwbmayamatrix-ai` | Ecosystem (Maya/Matrix) | VPS: `/data/.openclaw/workspace/data/.github_token` |
+
+### Sincronización
+- Workflow: `/github-sync` en `~/.agent/workflows/github-sync.md`
+- Redacción: `~/maya/.redact-rules.sed` (credenciales → `[REDACTED]`)
+- **NUNCA** subir ORQUESTADOR.md sin redactar
 
 ---
 
