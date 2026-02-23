@@ -1,29 +1,35 @@
 # 🧠 Anti-Gravity Orchestrator — Estado del Ecosistema
 
-> **Última actualización**: 2026-02-21 11:36
-> **Actualizado por**: Anti-Gravity (GitHub sync: ambos repos sincronizados, workflow creado, sistema redacción)
+> **Última actualización**: 2026-02-23 22:15
+> **Actualizado por**: Anti-Gravity (reestructura ~/ecosystem/, paths actualizados)
 
-Este documento es la **fuente de verdad central** del ecosistema Anti-Gravity + Maya.
+Este documento es la **fuente de verdad central** del ecosistema Anti-Gravity.
 Cualquier sesión de cualquier modelo de IA debe leer este documento antes de hacer cambios.
+
+> **Ubicación canónica**: `~/ecosystem/docs/ORQUESTADOR.md`
+> **Proyecto ecosistema**: `~/ecosystem/`
+> **Hoja de ruta**: `~/ecosystem/.agent/skills/ecosystem-roadmap/CHECKLIST.md`
 
 ---
 
 ## 1. Identidad del Ecosistema
 
-| Componente | Rol | Dónde vive |
-|-----------|-----|------------|
-| **Charly** | Owner, humano, toma decisiones finales | — |
-| **Anti-Gravity** | Cerebro orquestador, investigación, planificación | Mac local (Antigravity IDE) |
-| **Maya** | Agente 24/7, orquestadora, asistente personal | VPS Hostinger (Docker) — agente `main` |
-| **Matrix** | Brazo ejecutor, tareas delegadas por Maya | VPS Hostinger (Docker) — agente `worker` |
-| **n8n** | Automatización de workflows | VPS Hostinger (Docker) |
+| Componente | Rol | Dónde vive | Docs locales |
+|-----------|-----|------------|-------------|
+| **Charly** | Owner, humano, toma decisiones finales | — | — |
+| **Anti-Gravity** | Cerebro orquestador, investigación, planificación | Mac local (Antigravity IDE) | — |
+| **Maya** | Agente autónomo 24/7, orquestadora, asistente personal | VPS Hostinger (Docker) — agente `main` | `~/ecosystem/agents/maya/` |
+| **Matrix** | Agente autónomo, mismo rango que Maya, opera independiente | VPS Hostinger (Docker) — agente `worker` | `~/ecosystem/agents/matrix/` |
+| **GravityClaw** | Bot Telegram, interfaz con Supabase | Railway (TypeScript) | `~/ecosystem/agents/gravityclaw/` |
+| **n8n** | Automatización de workflows | VPS Hostinger (Docker) | — |
 
 ### Relación Anti-Gravity ↔ Maya ↔ Matrix
 - Anti-Gravity investiga, planifica y configura
-- Maya orquesta, supervisa y está disponible 24/7 via Telegram
-- Matrix ejecuta tareas delegadas por Maya (modelo: Kimi K2.5 via OpenRouter)
-- Comunicación Maya↔Matrix via `tools.agentToAgent` + `sessions_spawn`
-- Comunicación asíncrona Anti-Gravity↔Maya via directorio handoff en VPS
+- Maya opera de forma autónoma 24/7 via Telegram (`@Maya_Matrix_bot`)
+- Matrix opera de forma autónoma via Telegram (`@Matrix_maya_bot`)
+- **Maya y Matrix son agentes de igual rango** — no hay jerarquía entre ellos
+- Cada uno tiene su propio workspace, skills, memoria y bot de Telegram
+- Comunicación asíncrona Anti-Gravity↔Maya/Matrix via directorio handoff en VPS
 
 ---
 
@@ -153,8 +159,8 @@ systemctl stop claude-proxy && sleep 2 && systemctl start claude-proxy
 
 | ID | Nombre | Modelo | Telegram |
 |----|--------|--------|----------|
-| `main` | Maya - Asistente Personal | `claude-max/claude-opus-4-6` | `@Maya_Matrix_bot` (default) |
-| `worker` | Matrix - Brazo Ejecutor | `openrouter/moonshotai/kimi-k2.5` | `@Matrix_maya_bot` (worker) |
+| `main` | Maya - Agente Autónomo | `claude-max/claude-opus-4-6` | `@Maya_Matrix_bot` (default) |
+| `worker` | Matrix - Agente Autónomo | `openrouter/moonshotai/kimi-k2.5` | `@Matrix_maya_bot` (worker) |
 
 **Sub-agentes de Maya** (comparten workspace de Maya):
 
@@ -258,11 +264,25 @@ systemctl stop claude-proxy && sleep 2 && systemctl start claude-proxy
 | **Email** | `deepwbmayamatrix@gmail.com` |
 | **Proyecto GCP** | `matrix-487518` |
 | **Client ID** | `[REDACTED]` |
-| **Client Secret** | En `~/maya/.maya-credentials.json` (local) |
+| **Client Secret** | En `~/ecosystem/agents/maya/.maya-credentials.json` (local) |
 | **APIs** | Gmail, Drive, Calendar, Sheets, YouTube (Data+Analytics+Reporting), Cloud Vision, Dialogflow, Workspace Marketplace |
 | **Tokens VPS** | `/docker/openclaw-pyi4/data/.openclaw/workspace/skills/google-oauth/config/tokens.json` |
 | **Estado** | ✅ Tokens activos y operativos (confirmado 2026-02-17) |
 | **Nota** | Cuenta anterior (`maya.matrix102@gmail.com`) BLOQUEADA — no usar |
+
+---
+
+## 5b. Google OAuth 2.0 — Matrix
+
+| Dato | Valor |
+|------|-------|
+| **Email** | `[REDACTED]` |
+| **Proyecto GCP** | `[REDACTED]` |
+| **Client ID** | `[REDACTED]` |
+| **Client Secret** | En `~/ecosystem/agents/matrix/.matrix-credentials.json` (local) |
+| **APIs** | Gmail, Drive, Calendar, YouTube (Data+Analytics+Reporting), Cloud Vision, AdSense Management, Google Analytics |
+| **Tokens VPS** | `/docker/openclaw-pyi4/data/.openclaw/workspace-worker/skills/google-oauth/config/tokens.json` |
+| **Estado** | ✅ Tokens activos y operativos (generados 2026-02-23) |
 
 ---
 
@@ -282,27 +302,35 @@ systemctl stop claude-proxy && sleep 2 && systemctl start claude-proxy
 
 ---
 
-## 7. Skills Anti-Gravity (Mac local)
+## 7. Skills Compartidos (Mac local)
 
-| Skill | Archivo | Función |
-|-------|---------|---------|
-| `maya-openclaw` | `~/.agent/skills/maya-openclaw/SKILL.md` | Comandos SSH, diagnostics, config Maya |
-| `openclaw-reference` | `~/.agent/skills/openclaw-reference/SKILL.md` | Referencia completa OpenClaw |
-| `orchestrator` | `~/.agent/skills/orchestrator/SKILL.md` | **ESTE** — Agente orquestador |
-| `antigravity-skill-creator` | `~/.agent/skills/antigravity-skill-creator/SKILL.md` | Crear skills Anti-Gravity |
-| `brainstorming` | `~/.agent/skills/brainstorming/SKILL.md` | Brainstorming |
-| `brand-identity` | `~/.agent/skills/brand-identity/SKILL.md` | Identidad de marca |
-| `error-handling-patterns` | `~/.agent/skills/error-handling-patterns/SKILL.md` | Patrones de manejo de errores |
-| `reverse-engineering-videos` | `~/.agent/skills/reverse-engineering-videos/SKILL.md` | Ingeniería inversa de vídeos |
-| `writing-plans` | `~/.agent/skills/writing-plans/SKILL.md` | Planes de escritura |
+> **Ubicación**: `~/ecosystem/.agent/skills/` (fuente de verdad)
+> **Symlinks**: `~/.agent/skills`, `~/maya/.agent/skills`, `~/antigravityclaw/.agent/skills`, `~/matrix/.agent/skills`
 
-### Workflows Anti-Gravity
+| Skill | Función |
+|-------|---------|
+| `ecosystem-roadmap` | **Hoja de ruta maestra** — CHECKLIST.md + PLAN_DEFINITIVO.md |
+| `supabase-brain` | Shared Brain — Supabase database para todos los agentes |
+| `orchestrator` | Agente orquestador |
+| `maya-openclaw` | Comandos SSH, diagnostics, config Maya |
+| `openclaw-reference` | Referencia completa OpenClaw |
+| `antigravity-skill-creator` | Crear skills Anti-Gravity |
+| `brainstorming` | Brainstorming |
+| `brand-identity` | Identidad de marca |
+| `error-handling-patterns` | Patrones de manejo de errores |
+| `reverse-engineering-videos` | Ingeniería inversa de vídeos |
+| `writing-plans` | Planes de escritura |
+| + 19 superpowers skills | TDD, debugging, verification, git worktrees, etc. |
 
-| Workflow | Archivo | Función |
-|----------|---------|---------| 
-| `/github-sync` | `~/maya/.agent/workflows/github-sync.md` | Sincronizar docs con GitHub (ambos repos) |
-| `/learn-from-errors` | `~/maya/.agent/workflows/learn-from-errors.md` | Consultar error-journal antes de tareas complejas |
-| `/log-error` | `~/maya/.agent/workflows/log-error.md` | Registrar error/lección en error-journal |
+### Workflows
+
+> **Ubicación**: `~/ecosystem/.agent/workflows/`
+
+| Workflow | Función |
+|----------|---------|
+| `/github-sync` | Sincronizar docs con GitHub (ambos repos) |
+| `/learn-from-errors` | Consultar error-journal antes de tareas complejas |
+| `/log-error` | Registrar error/lección en error-journal |
 
 ---
 
@@ -426,7 +454,13 @@ Maya tiene personalidad calibrada: respuestas directas, brevedad, humor natural,
 | 2026-02-21 | **Workflow `/github-sync` creado** — Proceso completo para sincronizar docs con GitHub: redacción de credenciales, push a repos, troubleshooting. Soporta push a ambos repos, solo Charly103, o solo Maya | `~/.agent/workflows/github-sync.md` | ✅ |
 | 2026-02-21 | **GitHub Maya (`deepwbmayamatrix-ai/Maya`) inicializado** — Repo vacío inicializado con ORQUESTADOR.md (redactado) + error-journal.md completo (25 entradas). Token: `/data/.openclaw/workspace/data/.github_token` | GitHub | ✅ |
 | 2026-02-21 | **GitHub Charly (`Charly103/maya-agent-army`) actualizado** — ORQUESTADOR.md redactado (503 líneas), error-journal.md (282 líneas), agent identity files (Maya SOUL + Matrix SOUL/IDENTITY/AGENTS/MEMORY). Todo sin credenciales | GitHub | ✅ |
+| 2026-02-23 | **Rol Matrix corregido** — Matrix ya no es "brazo ejecutor", es agente autónomo de igual rango que Maya. Documentación actualizada | ORQUESTADOR.md | ✅ |
+| 2026-02-23 | **Grupo Telegram eliminado** — Grupo de coordinación `-1003600657980` eliminado. Sección 13 reescrita. Comunicación obsoleta (docker exec agent, sessions_spawn) eliminada | Telegram / ORQUESTADOR.md | ✅ |
+| 2026-02-23 | **`~/matrix/` creado** — Directorio local separado para Matrix con SOUL.md, MEMORY.md, AGENTS.md, IDENTITY.md, ORQUESTADOR-MATRIX.md. Archivos de Matrix eliminados de `~/maya/` | Local Mac | ✅ |
 | 2026-02-21 | **Sistema de redacción seguro** — `~/maya/.redact-rules.sed` contiene reglas de sustitución de credenciales. ORQUESTADOR redactado se genera con `sed -f`. Verificación post-redacción con grep. Ningún token/key/phone expuesto en repos | Local | ✅ |
+| 2026-02-23 | **Google OAuth Matrix completado** — Cuenta `[REDACTED]` con proyecto GCP propio, 9 APIs habilitadas (Gmail, Drive, Calendar, YouTube×3, Cloud Vision, AdSense, Analytics). Tokens generados y operativos. Credenciales guardadas en `~/matrix/.matrix-credentials.json` | VPS + Local | ✅ |
+| 2026-02-23 | **Redact rules actualizadas** — Añadidas credenciales de Matrix (client_id, secret, email, password, tokens, project_id) a `.redact-rules.sed` | Local | ✅ |
+| 2026-02-23 | **`~/ecosystem/` creado** — Proyecto umbrella para todo el ecosistema. Skills (30), workflows (3), docs compartidos movidos aquí. Agent symlinks (maya, gravityclaw, matrix). `~/.agent/skills` y `~/maya/.agent/skills` → `~/ecosystem/.agent/skills`. Backward-compatible | Local | ✅ |
 
 ---
 
@@ -473,31 +507,18 @@ Maya tiene personalidad calibrada: respuestas directas, brevedad, humor natural,
 
 ---
 
-## 13. Comunicación Maya ↔ Matrix (verificado 2026-02-20)
+## 13. Agentes Independientes — Maya y Matrix
 
-### Método real para Maya → Matrix
-`sessions_spawn` via ocl-tool HTTP API NO funciona para agentToAgent entre agentes principales.
-El método correcto (verificado funcionando):
-```bash
-docker exec openclaw-pyi4-openclaw-1 openclaw agent \
-  --agent worker \
-  --message "descripción de la tarea" \
-  --channel telegram --to "[REDACTED]" \
-  --deliver --timeout 600
-```
+Maya y Matrix son **agentes autónomos de igual rango**. Cada uno opera independientemente via su bot de Telegram.
 
-### Grupo Telegram de coordinación
-- **ID**: `-1003600657980`
-- **Participantes**: Charly + @Maya_Matrix_bot + @Matrix_maya_bot
-- **Config**: `requireMention: true` (cada bot solo responde cuando se le menciona)
-- **Maya escribe en grupo**: `ocl-tool message '{"channel":"telegram","accountId":"default","to":"-1003600657980","text":"..."}'`
-- **Matrix escribe en grupo**: `ocl-tool message '{"channel":"telegram","accountId":"worker","to":"-1003600657980","text":"..."}'`
+| Aspecto | Maya | Matrix |
+|---------|------|--------|
+| **Bot** | `@Maya_Matrix_bot` | `@Matrix_maya_bot` |
+| **Modelo** | Claude Opus 4.6 (Max) | Kimi K2.5 (OpenRouter) |
+| **Workspace** | `workspace/` | `workspace-worker/` |
+| **Docs locales** | `~/ecosystem/agents/maya/` | `~/ecosystem/agents/matrix/` |
 
-### Flujo de delegación
-```
-Charly/Anti-Gravity → Maya (DM o grupo) → Maya delega a Matrix (openclaw agent)
-Matrix ejecuta → reporta en grupo → Maya resume a Charly
-```
+> **Nota**: El grupo de coordinación Telegram (`-1003600657980`) fue eliminado el 2026-02-23. Cada agente opera por su canal directo.
 
 ---
 
@@ -527,8 +548,8 @@ Matrix ejecuta → reporta en grupo → Maya resume a Charly
 | `deepwbmayamatrix-ai` | Ecosystem (Maya/Matrix) | VPS: `/data/.openclaw/workspace/data/.github_token` |
 
 ### Sincronización
-- Workflow: `/github-sync` en `~/.agent/workflows/github-sync.md`
-- Redacción: `~/maya/.redact-rules.sed` (credenciales → `[REDACTED]`)
+- Workflow: `/github-sync` en `~/ecosystem/.agent/workflows/github-sync.md`
+- Redacción: `~/ecosystem/agents/maya/.redact-rules.sed` (credenciales → `[REDACTED]`)
 - **NUNCA** subir ORQUESTADOR.md sin redactar
 
 ---
