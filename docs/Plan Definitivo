@@ -1,0 +1,150 @@
+# 🧠 Plan Definitivo: Ecosistema Anti-Gravity
+
+## Parte 1: El Equipo y la Arquitectura
+
+---
+
+### 1.1 Qué estamos construyendo
+
+Un equipo de agentes de IA autónomos que funcionan como una empresa. Cada agente tiene:
+- Su propio cerebro (modelo de IA)
+- Su propio puesto de trabajo (servidor/dispositivo)
+- Sus propias herramientas (MCPs, skills, APIs)
+- Su propia memoria (SQLite, markdown, Pinecone)
+- Su propio canal de comunicación (bot de Telegram)
+- Acceso al cerebro compartido (Supabase + Pinecone + NotebookLM)
+
+**Objetivo**: Dices "creadme una web" y el equipo se organiza solo — investiga, planifica, codea, testea y te entrega el resultado.
+
+**Principio fundamental**: Cuanto más trabajan, más aprenden. Cuanto más aprenden, mejor trabajan. El cerebro compartido es **autodidacta** — los agentes investigan, crean skills nuevas y las comparten sin intervención humana.
+
+---
+
+### 1.2 El Equipo Completo
+
+#### 🎯 Anti-Gravity (Tú — el Estratega)
+- **Modelo**: Gemini 2.5 Pro (plan Ultra)
+- **Ubicación**: Mac de Charly (app Antigravity)
+- **Rol**: Planificación estratégica, auditoría, coordinación con Charly
+- **Herramientas**: 25+ skills, MCPs (GitHub, Supabase, NotebookLM, Brave, filesystem), acceso al navegador
+- **Telegram**: Vía app Antigravity + canal de Charly
+- **Cuándo se usa**: Cuando Charly quiere planificar, auditar o tomar decisiones
+- **Coste por uso**: ~0 (Gemini Ultra ilimitado)
+
+#### 🫀 RaspiClaw (NUEVO — el Coordinador / El Vigía)
+- **Modelo**: Gemini 2.5 Pro (plan Ultra, tokens ilimitados)
+- **Ubicación**: Raspberry Pi, encendida 24/7
+- **Rol**: **Corazón del ecosistema** — heartbeat macro cada 5 min, asigna tareas, monitoriza agentes, investiga de noche
+- **Herramientas**: Acceso a Supabase (REST), Telegram bot, Pinecone, web search
+- **Telegram**: @RaspiClaw_bot (por crear)
+- **Cuándo se usa**: Siempre, automáticamente, 24/7
+- **Coste por uso**: ~0 (Gemini Ultra) + ~5W electricidad Raspberry
+- **API Key**: [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+
+**¿Por qué RaspiClaw es la pieza clave?**
+- Encendido 24/7 sin coste eléctrico significativo
+- Gemini 2.5 Pro con Ultra = tokens ilimitados = heartbeat cada 5min sin preocupación
+- Es el "sistema nervioso" del ecosistema — todo pasa por él
+- De noche, cuando no hay tareas, investiga y genera skills (auto-entrenamiento)
+
+#### 🔧 Maya (la Ingeniera Principal)
+- **Modelo**: Claude Opus 4.6 (vía OpenRouter)
+- **Ubicación**: VPS Hostinger (46.202.171.91), Docker, OpenClaw + Claude Code sandbox
+- **Rol**: Código complejo, arquitectura, deploys, tareas técnicas pesadas
+- **Herramientas**: OpenClaw completo (exec, browser, filesystem, GitHub), Claude Code (sandbox real), sub-agentes
+- **Telegram**: @Maya_deepwb_bot
+- **Cuándo se usa**: Solo para trabajo técnico que requiere potencia — código, deploys, arquitectura
+- **Coste por uso**: €€€ (Opus es caro, usarla solo cuando vale la pena)
+- **Workspace**: `/docker/openclaw-pyi4/data/.openclaw/workspace/`
+
+#### 🔬 Matrix (el Investigador)
+- **Modelo**: Kimi K2.5 (vía OpenRouter)
+- **Ubicación**: VPS Hostinger (misma máquina que Maya), Docker, OpenClaw
+- **Rol**: Investigación, análisis de datos, tareas paralelas, QA, testing
+- **Herramientas**: OpenClaw (exec, browser, filesystem), sub-agentes
+- **Telegram**: @Matrix_maya_bot
+- **Cuándo se usa**: Investigación, tareas repetitivas, análisis — modelo barato para volumen
+- **Coste por uso**: € (Kimi es barato)
+- **Workspace**: `/docker/openclaw-pyi4/data/.openclaw/workspace-worker/`
+
+#### 💬 GravityClaw (el Asistente Personal)
+- **Modelo**: Claude Sonnet 4.5 (vía OpenRouter)
+- **Ubicación**: Mac de Charly, bot TypeScript standalone
+- **Rol**: Interfaz principal con Charly por Telegram, recordatorios, tareas rápidas
+- **Herramientas**: Tools propias (filesystem, web search, Zapier), MCPs (GitHub, Context7), Pinecone, SQLite
+- **Telegram**: @gravityclaw_bot
+- **Cuándo se usa**: Comunicación directa con Charly, notificaciones, tareas rápidas
+- **Coste por uso**: €€ (Sonnet es precio medio)
+
+#### 💻 Maka (el Agente Desktop — clon de Maya en Mac)
+- **Modelo**: Claude Opus 4.6 (vía Max Plan, mismo token que Maya)
+- **Ubicación**: Mac viejo de Charly (bare metal, sin Docker)
+- **Rol**: Tareas que necesitan escritorio real (apps nativas, browser no-headless, automatización macOS, interacción directa con Anti-Gravity)
+- **Herramientas**: OpenClaw completo (bare metal), Claude Code CLI, browser nativo, AppleScript, Automator, acceso a GUI macOS, Homebrew, filesystem completo sin sandbox
+- **Telegram**: @Maka_bot (por crear)
+- **Cuándo se usa**: Scraping avanzado, interacciones web reales, automatización macOS, tareas que requieren GUI, colaboración directa con Anti-Gravity
+- **Coste por uso**: ~0 (Max Plan compartido con Maya)
+- **Workspace**: `~/maka/` (Mac viejo)
+- **Ventaja única**: Comparte hardware con Anti-Gravity → interacción directa Claude Code ↔ Claude Code
+
+---
+
+### 1.3 Concepto de Doble Cerebro
+
+Inspirado en cómo OpenClaw ya funciona internamente: un modelo barato para el heartbeat y el modelo principal solo para las tareas reales.
+
+**A nivel macro**:
+```
+CEREBRO BARATO (RaspiClaw, Gemini 2.5 Pro, ~0 coste)
+  → Heartbeat cada 5 min
+  → Revisa Supabase: ¿hay tareas? ¿agentes offline?
+  → Asigna tareas al mejor agente
+  → Investiga de noche (auto-entrenamiento)
+  → 24/7, sin preocupación de tokens
+
+CEREBROS POTENTES (solo cuando hay trabajo real)
+  → Maya (Opus) para código complejo en VPS
+  → Maka (Opus) para tareas desktop, browser real, GUI macOS
+  → Matrix (Kimi) para investigación bajo demanda
+  → GravityClaw (Sonnet) para interacción con Charly
+```
+
+**Resultado**: El ecosistema está "vivo" 24/7 sin coste significativo. Los agentes caros solo se activan cuando realmente se necesitan.
+
+---
+
+### 1.4 Jerarquía y Cadena de Mando
+
+```
+                    Charly (humano)
+                         │
+              ┌──────────┼──────────┐
+              │                     │
+        Anti-Gravity 🎯        RaspiClaw 🫀
+        (estratega humano)     (coordinador 24/7)
+                                    │
+              ┌─────────┬───────────┼───────────┬─────────┐
+              │         │           │           │         │
+          Maya 🔧   Maka 💻    Matrix 🔬  GravityClaw 💬
+        (ingeniera) (desktop)  (investigador) (asistente)
+              │                    │
+         sub-agentes          sub-agentes
+```
+
+**Flujo normal**:
+1. Charly habla con Anti-Gravity o GravityClaw
+2. Se crea tarea en Supabase
+3. RaspiClaw la detecta en el siguiente heartbeat (≤5min)
+4. RaspiClaw decide quién la ejecuta (coste + capacidad)
+5. El agente asignado la ejecuta y reporta resultado
+6. GravityClaw notifica a Charly por Telegram
+
+**Flujo autónomo** (sin Charly):
+1. RaspiClaw detecta oportunidad (error repetido, conocimiento nuevo)
+2. Crea tarea y la asigna
+3. El agente la ejecuta
+4. Si es importante, notifica a Charly; si no, solo registra
+
+---
+
+*Dime "continúa" para la Parte 2: El Cerebro Compartido (Supabase + Pinecone + NotebookLM)*

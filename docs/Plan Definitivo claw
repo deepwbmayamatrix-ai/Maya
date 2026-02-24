@@ -1,0 +1,685 @@
+# 🧠 Plan Definitivo: Ecosistema Anti-Gravity
+
+## Parte 1: El Equipo y la Arquitectura
+
+---
+
+### 1.1 Qué estamos construyendo
+
+Un equipo de agentes de IA autónomos que funcionan como una empresa. Cada agente tiene:
+- Su propio cerebro (modelo de IA)
+- Su propio puesto de trabajo (servidor/dispositivo)
+- Sus propias herramientas (MCPs, skills, APIs)
+- Su propia memoria (SQLite, markdown, Pinecone)
+- Su propio canal de comunicación (bot de Telegram)
+- Acceso al cerebro compartido (Supabase + Pinecone + NotebookLM)
+
+**Objetivo**: Dices "creadme una web" y el equipo se organiza solo — investiga, planifica, codea, testea y te entrega el resultado.
+
+**Principio fundamental**: Cuanto más trabajan, más aprenden. Cuanto más aprenden, mejor trabajan. El cerebro compartido es **autodidacta** — los agentes investigan, crean skills nuevas y las comparten sin intervención humana.
+
+---
+
+### 1.2 El Equipo Completo
+
+#### 🎯 Anti-Gravity (Tú — el Estratega)
+- **Modelo**: Gemini 2.5 Pro (plan Ultra)
+- **Ubicación**: Mac de Charly (app Antigravity)
+- **Rol**: Planificación estratégica, auditoría, coordinación con Charly
+- **Herramientas**: 25+ skills, MCPs (GitHub, Supabase, NotebookLM, Brave, filesystem), acceso al navegador
+- **Telegram**: Vía app Antigravity + canal de Charly
+- **Cuándo se usa**: Cuando Charly quiere planificar, auditar o tomar decisiones
+- **Coste por uso**: ~0 (Gemini Ultra ilimitado)
+
+#### 🫀 RaspiClaw (NUEVO — el Coordinador / El Vigía)
+- **Modelo**: Gemini 2.5 Pro (plan Ultra, tokens ilimitados)
+- **Ubicación**: Raspberry Pi, encendida 24/7
+- **Rol**: **Corazón del ecosistema** — heartbeat macro cada 5 min, asigna tareas, monitoriza agentes, investiga de noche
+- **Herramientas**: Acceso a Supabase (REST), Telegram bot, Pinecone, web search
+- **Telegram**: @RaspiClaw_bot (por crear)
+- **Cuándo se usa**: Siempre, automáticamente, 24/7
+- **Coste por uso**: ~0 (Gemini Ultra) + ~5W electricidad Raspberry
+- **API Key**: [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+
+**¿Por qué RaspiClaw es la pieza clave?**
+- Encendido 24/7 sin coste eléctrico significativo
+- Gemini 2.5 Pro con Ultra = tokens ilimitados = heartbeat cada 5min sin preocupación
+- Es el "sistema nervioso" del ecosistema — todo pasa por él
+- De noche, cuando no hay tareas, investiga y genera skills (auto-entrenamiento)
+
+#### 🔧 Maya (la Ingeniera Principal)
+- **Modelo**: Claude Opus 4.6 (vía OpenRouter)
+- **Ubicación**: VPS Hostinger (46.202.171.91), Docker, OpenClaw + Claude Code sandbox
+- **Rol**: Código complejo, arquitectura, deploys, tareas técnicas pesadas
+- **Herramientas**: OpenClaw completo (exec, browser, filesystem, GitHub), Claude Code (sandbox real), sub-agentes
+- **Telegram**: @Maya_deepwb_bot
+- **Cuándo se usa**: Solo para trabajo técnico que requiere potencia — código, deploys, arquitectura
+- **Coste por uso**: €€€ (Opus es caro, usarla solo cuando vale la pena)
+- **Workspace**: `/docker/openclaw-pyi4/data/.openclaw/workspace/`
+
+#### 🔬 Matrix (el Investigador)
+- **Modelo**: Kimi K2.5 (vía OpenRouter)
+- **Ubicación**: VPS Hostinger (misma máquina que Maya), Docker, OpenClaw
+- **Rol**: Investigación, análisis de datos, tareas paralelas, QA, testing
+- **Herramientas**: OpenClaw (exec, browser, filesystem), sub-agentes
+- **Telegram**: @Matrix_maya_bot
+- **Cuándo se usa**: Investigación, tareas repetitivas, análisis — modelo barato para volumen
+- **Coste por uso**: € (Kimi es barato)
+- **Workspace**: `/docker/openclaw-pyi4/data/.openclaw/workspace-worker/`
+
+#### 💬 GravityClaw (el Asistente Personal)
+- **Modelo**: Claude Sonnet 4.5 (vía OpenRouter)
+- **Ubicación**: Mac de Charly, bot TypeScript standalone
+- **Rol**: Interfaz principal con Charly por Telegram, recordatorios, tareas rápidas
+- **Herramientas**: Tools propias (filesystem, web search, Zapier), MCPs (GitHub, Context7), Pinecone, SQLite
+- **Telegram**: @gravityclaw_bot
+- **Cuándo se usa**: Comunicación directa con Charly, notificaciones, tareas rápidas
+- **Coste por uso**: €€ (Sonnet es precio medio)
+
+#### 💻 Maka (el Agente Desktop — clon de Maya en Mac)
+- **Modelo**: Claude Opus 4.6 (vía Max Plan, mismo token que Maya)
+- **Ubicación**: Mac viejo de Charly (bare metal, sin Docker)
+- **Rol**: Tareas que necesitan escritorio real (apps nativas, browser no-headless, automatización macOS, interacción directa con Anti-Gravity)
+- **Herramientas**: OpenClaw completo (bare metal), Claude Code CLI, browser nativo, AppleScript, Automator, acceso a GUI macOS, Homebrew, filesystem completo sin sandbox
+- **Telegram**: @Maka_bot (por crear)
+- **Cuándo se usa**: Scraping avanzado, interacciones web reales, automatización macOS, tareas que requieren GUI, colaboración directa con Anti-Gravity
+- **Coste por uso**: ~0 (Max Plan compartido con Maya)
+- **Workspace**: `~/maka/` (Mac viejo)
+- **Ventaja única**: Comparte hardware con Anti-Gravity → interacción directa Claude Code ↔ Claude Code
+
+---
+
+### 1.3 Concepto de Doble Cerebro
+
+Inspirado en cómo OpenClaw ya funciona internamente: un modelo barato para el heartbeat y el modelo principal solo para las tareas reales.
+
+**A nivel macro**:
+```
+CEREBRO BARATO (RaspiClaw, Gemini 2.5 Pro, ~0 coste)
+  → Heartbeat cada 5 min
+  → Revisa Supabase: ¿hay tareas? ¿agentes offline?
+  → Asigna tareas al mejor agente
+  → Investiga de noche (auto-entrenamiento)
+  → 24/7, sin preocupación de tokens
+
+CEREBROS POTENTES (solo cuando hay trabajo real)
+  → Maya (Opus) para código complejo en VPS
+  → Maka (Opus) para tareas desktop, browser real, GUI macOS
+  → Matrix (Kimi) para investigación bajo demanda
+  → GravityClaw (Sonnet) para interacción con Charly
+```
+
+**Resultado**: El ecosistema está "vivo" 24/7 sin coste significativo. Los agentes caros solo se activan cuando realmente se necesitan.
+
+---
+
+### 1.4 Jerarquía y Cadena de Mando
+
+```
+                    Charly (humano)
+                         │
+              ┌──────────┼──────────┐
+              │                     │
+        Anti-Gravity 🎯        RaspiClaw 🫀
+        (estratega humano)     (coordinador 24/7)
+                                    │
+              ┌─────────┬───────────┼───────────┬─────────┐
+              │         │           │           │         │
+          Maya 🔧   Maka 💻    Matrix 🔬  GravityClaw 💬
+        (ingeniera) (desktop)  (investigador) (asistente)
+              │                    │
+         sub-agentes          sub-agentes
+```
+
+**Flujo normal**:
+1. Charly habla con Anti-Gravity o GravityClaw
+2. Se crea tarea en Supabase
+3. RaspiClaw la detecta en el siguiente heartbeat (≤5min)
+4. RaspiClaw decide quién la ejecuta (coste + capacidad)
+5. El agente asignado la ejecuta y reporta resultado
+6. GravityClaw notifica a Charly por Telegram
+
+**Flujo autónomo** (sin Charly):
+1. RaspiClaw detecta oportunidad (error repetido, conocimiento nuevo)
+2. Crea tarea y la asigna
+3. El agente la ejecuta
+4. Si es importante, notifica a Charly; si no, solo registra
+
+---
+
+*Dime "continúa" para la Parte 2: El Cerebro Compartido (Supabase + Pinecone + NotebookLM)*
+
+---
+
+## Parte 2: El Cerebro Compartido
+
+### 2.1 Las 3 Capas de Memoria
+
+Cada agente tiene memoria propia. Pero lo que hace único a este ecosistema es el **cerebro compartido** — 3 capas que van de lo rápido/privado a lo compartido/persistente:
+
+#### Capa 1: Memoria Local (rápida, privada, por agente)
+
+Cada agente guarda su día a día aquí. No se comparte automáticamente.
+
+| Agente | Tecnología | Qué guarda | Dónde |
+|--------|-----------|------------|-------|
+| Maya/Matrix | Markdown `memory/YYYY-MM-DD.md` + `MEMORY.md` | Conversaciones, decisiones del día, hechos permanentes | Workspace OpenClaw |
+| Maka | Markdown `memory/` + `MEMORY.md` | Igual que Maya, más logs de interacción con Anti-Gravity | `~/maka/` (Mac viejo) |
+| GravityClaw | SQLite + FTS5 (`gravity-claw.db`) | Hechos, preferencias de usuario, contexto | Mac local |
+| RaspiClaw | Markdown (igual que OpenClaw) o SQLite | Logs de coordinación, estado del ecosistema | Raspberry Pi |
+| Anti-Gravity | Skills + archivos .md | Planes, auditorías, documentación | Mac (`.agent/skills/`) |
+
+**Tecnología clave de OpenClaw**: Memory flush automático — antes de que el contexto se llene, OpenClaw fuerza al agente a guardar memorias en `memory/YYYY-MM-DD.md`. Nunca pierde información por compactación.
+
+**Tecnología clave de GravityClaw**: FTS5 full-text search — busca memorias por keywords instantáneamente, sin latencia de red.
+
+#### Capa 2: Memoria Vectorial (semántica, compartida)
+
+Buscar por **significado**, no solo por palabras. "¿Qué sabemos sobre deploy en Railway?" encuentra resultados aunque nadie haya escrito "Railway" exactamente.
+
+| Componente | Tecnología | Namespace |
+|-----------|-----------|-----------|
+| **Por agente** | Pinecone, `multilingual-e5-large` | `gravity-claw`, `maya`, `matrix` |
+| **Compartido** | Pinecone | `ecosystem` (NUEVO) |
+
+**Cómo funciona el namespace `ecosystem`**:
+- Cuando un agente aprende algo **importante y reutilizable**, lo sube a Pinecone namespace `ecosystem`
+- Cualquier agente puede buscar ahí: "¿cómo se despliega en Vercel?" → obtiene conocimiento de Maya aunque nunca haya desplegado
+- OpenClaw ya tiene búsqueda híbrida BM25+vector internamente — lo extendemos a nivel ecosistema
+
+**GravityClaw ya tiene Pinecone configurado** con `multilingual-e5-large` (1024 dims, cosine similarity). Los demás agentes necesitan acceso al mismo index.
+
+#### Capa 3: Memoria Estructurada (Supabase — el cerebro central)
+
+La base de datos PostgreSQL compartida. Es donde vive la inteligencia colectiva.
+
+| Tabla | Para qué | Quién escribe | Quién lee |
+|-------|----------|--------------|-----------|
+| `agents` | Estado de cada agente (online, last_seen, modelo) | Cada agente (heartbeat) | RaspiClaw (monitoreo) |
+| `tasks` | Cola de trabajo con prioridades | Cualquiera | RaspiClaw + asignado |
+| `knowledge` | Conocimiento compartido, skills, lecciones | Cualquiera | Todos |
+| `error_patterns` | Errores y cómo evitarlos | Quien comete el error | Todos (preventivo) |
+| `decisions` | Decisiones arquitectónicas y su contexto | Quien decide | Todos |
+| `agent_sessions` | Tracking de sesiones activas | Automático | RaspiClaw |
+
+**Acceso**: Todos usan REST API con `service_role` key (bypasses RLS). RLS habilitado para seguridad pero los agentes son trusted.
+
+---
+
+### 2.2 NotebookLM como Motor de Aprendizaje
+
+No solo un archivo — un sistema activo de aprendizaje:
+
+| Notebook | Contenido | Quién lo alimenta |
+|----------|-----------|-------------------|
+| Ecosistema Anti-Gravity | ORQUESTADOR.md, arquitectura, decisiones | Anti-Gravity |
+| Skills Library | Todos los skills creados | Cualquier agente |
+| Error Journal | Errores y soluciones | Automático desde Supabase |
+| Por proyecto | Documentación específica de cada proyecto | El agente asignado |
+
+**Flujo**: Cuando se acumula suficiente conocimiento nuevo en Supabase → RaspiClaw lo empaqueta y lo sube a NotebookLM → genera resúmenes → esos resúmenes se convierten en skills.
+
+---
+
+### 2.3 Memory Flush Macro (el ecosistema nunca olvida)
+
+Inspirado en el memory flush de OpenClaw, pero a nivel ecosistema:
+
+```
+Antes de que un agente termine sesión o tarea:
+
+1. GUARDAR LOCAL
+   → memory/YYYY-MM-DD.md (OpenClaw) o SQLite (GravityClaw)
+
+2. ¿APRENDÍ ALGO ÚTIL?
+   → Sí → POST a Supabase knowledge
+   → Categoría: architecture, config, lesson, skill, credential_location
+
+3. ¿RESOLVÍ UN ERROR?
+   → Sí → POST a Supabase error_patterns
+   → Con: qué pasó, por qué, cómo se arregló, cómo prevenirlo
+
+4. ¿CREÉ UN SKILL NUEVO?
+   → Sí → Guardar en workspace/skills/ + POST a Supabase (category: 'skill')
+
+5. ACTUALIZAR PRESENCIA
+   → PATCH agents.last_seen
+
+El ecosistema aprende de CADA sesión sin intervención humana.
+```
+
+---
+
+### 2.4 El Ciclo Autodidacta
+
+El punto más importante de todo el plan. El cerebro NO es pasivo:
+
+```
+         ┌──────────────────────────────────────┐
+         │                                      │
+    INVESTIGAR                              APLICAR
+    (web, docs, YouTube,                    (cualquier agente
+     NotebookLM)                             lo encuentra y lo usa)
+         │                                      ▲
+         ▼                                      │
+    APRENDER                               COMPARTIR
+    (digerir info →                         (subir a Supabase
+     escribir en knowledge)                  para todos)
+         │                                      ▲
+         ▼                                      │
+    CREAR SKILL ────────────────────────────────┘
+    (si es reutilizable →
+     escribir .md)
+```
+
+**Ejemplo concreto**: Charly pide "Automatizad un canal de YouTube"
+
+```
+Día 1:
+  RaspiClaw: Crea pipeline → asigna "investigar YouTube API" a Matrix
+  Matrix: Investiga → encuentra API docs, mejores prácticas, herramientas
+  Matrix: Crea skill youtube-automation.md → lo sube a Supabase
+  Matrix: Marca tarea completada
+
+Día 2:
+  RaspiClaw: Detecta tarea "implementar automatización" → asigna a Maya
+  Maya: Lee skill de Matrix desde Supabase → entiende la API
+  Maya: Implementa scripts → commit a GitHub
+  Maya: Crea skill youtube-deployment.md → lo sube a Supabase
+  GravityClaw: Notifica a Charly: "Automatización lista"
+
+Futuro:
+  Charly pide algo de YouTube de nuevo
+  → Los skills ya existen → 10x más rápido
+  → Los agentes ya saben cómo funciona → menos errores
+```
+
+---
+
+*Dime "continúa" para la Parte 3: Delegación Inteligente, Pipelines y Heartbeat Macro*
+
+---
+
+## Parte 3: Delegación, Pipelines y Automatización
+
+### 3.1 Reglas de Delegación
+
+Cuando llega una tarea, RaspiClaw decide quién la ejecuta con esta lógica:
+
+```
+PASO 1: ¿Quién PUEDE hacerlo?
+  → Filtrar por herramientas necesarias
+  → Maya tiene: exec, browser (headless), Claude Code sandbox, GitHub
+  → Maka tiene: exec, browser (nativo), GUI macOS, AppleScript, filesystem completo, GitHub
+  → Matrix tiene: exec, browser (headless), GitHub
+  → GravityClaw tiene: filesystem, web search, Zapier, MCPs
+  → RaspiClaw tiene: web search, Supabase, Telegram
+
+PASO 2: De los que pueden, ¿quién es más BARATO?
+  → RaspiClaw (Gemini Ultra ~0) > Maka (Opus Max ~0) > Matrix (Kimi €) > GravityClaw (Sonnet €€) > Maya (Opus €€€)
+
+PASO 3: ¿Vale la pena PARALELIZAR?
+  → Tareas independientes → sí, repartir entre agentes
+  → Tareas dependientes → pipeline secuencial
+  → Una sola tarea simple → un solo agente
+```
+
+**Tabla de especialidades**:
+
+| Tipo de tarea | Agente primario | Alternativa | Por qué |
+|--------------|----------------|-------------|---------|
+| Código complejo, arquitectura | Maya | Maka | Opus es el mejor para código |
+| Scraping web, browser real | Maka | Maya (headless) | Browser nativo no-headless |
+| Automatización macOS, GUI | Maka | — | Único con acceso a GUI real |
+| Investigación, análisis | Matrix | RaspiClaw | Kimi barato, Gemini gratuito |
+| Interacción con Charly | GravityClaw | Maya | Ya es su asistente Telegram |
+| Coordinación, monitoreo | RaspiClaw | — | 24/7, gratuito |
+| Testing, QA | Matrix | Maya | Barato para tareas repetitivas |
+| Crear documentación | Matrix o RaspiClaw | Maya | No requiere Opus |
+| Colaboración con Anti-Gravity | Maka | — | Comparten hardware, interacción directa |
+
+**Cadena de fallback**:
+```
+RaspiClaw asigna a Agente X
+  → X acepta y ejecuta ✅
+  → X no puede (herramientas) → deriva a Y
+  → Y no puede → deriva a Z
+  → Nadie puede → RaspiClaw crea subtarea + notifica a Charly
+  
+La cadena completa se registra en Supabase → el ecosistema aprende
+quién es mejor para qué tipo de tarea.
+```
+
+---
+
+### 3.2 Pipelines Automáticos
+
+Para proyectos complejos, RaspiClaw crea **pipelines** — cadenas de tareas donde cada paso depende del anterior:
+
+```
+Pipeline: "Crear web portfolio"
+
+Paso 1 [Matrix, paralelo]
+  → Investigar diseños modernos de portfolio
+  → Investigar stack tecnológico recomendado
+  
+Paso 2 [Maya, espera paso 1]
+  → Leer investigación de Matrix desde Supabase
+  → Diseñar arquitectura de la web
+  
+Paso 3 [Maya, espera paso 2]
+  → Implementar la web completa
+  → Commit a GitHub
+  
+Paso 4 [Matrix, espera paso 3]
+  → Testing: verificar responsive, performance, accesibilidad
+  → Reportar bugs si los hay → vuelta a paso 3
+  
+Paso 5 [GravityClaw, espera paso 4]
+  → Notificar a Charly: "Web lista, aquí el repo"
+  → Pedir feedback
+```
+
+**Cómo se implementa en Supabase**:
+- Tabla `tasks` tiene campo `parent_task` para vincular pasos
+- Campo `status`: `pending` → `assigned` → `in_progress` → `completed`/`failed`
+- RaspiClaw monitoriza: cuando paso N se completa → activa paso N+1
+
+---
+
+### 3.3 Heartbeat Macro (el pulso del ecosistema)
+
+**RaspiClaw ejecuta esto cada 5 minutos**:
+
+```
+HEARTBEAT MACRO:
+
+1. COMPROBAR AGENTES
+   → Para cada agente en Supabase:
+     ¿last_seen > 1 hora? → alertar a Charly
+     ¿last_seen > 24h? → marcar como "offline"
+
+2. REVISAR TAREAS
+   → ¿Tareas pending sin asignar? → asignar según reglas 3.1
+   → ¿Tareas in_progress > 2h? → verificar si el agente se colgó
+   → ¿Tareas completed? → activar siguiente paso del pipeline
+   → ¿Tareas failed? → re-asignar o escalar a Charly
+
+3. REVISAR ERRORES
+   → ¿Error repetido 3+ veces? → crear regla preventiva automática
+   → ¿Error nuevo crítico? → notificar a Charly inmediatamente
+
+4. REVISAR CONOCIMIENTO
+   → ¿Knowledge nuevo que otros agentes deberían saber? → notificar
+   → ¿Skill nuevo creado? → registrar en el marketplace
+
+5. RESULTADO
+   → Si algo requiere acción → ejecutar o notificar
+   → Si todo bien → HEARTBEAT_OK (no gasta nada extra)
+```
+
+**Active hours por agente**:
+| Agente | Horario | Por qué |
+|--------|---------|---------|
+| RaspiClaw | 24/7 | Es el coordinador, siempre encendido |
+| Maya | 24/7 | VPS siempre on, pero solo trabaja si hay tarea |
+| Matrix | 24/7 | Igual que Maya |
+| Maka | 24/7 | Mac viejo siempre on (`pmset sleep 0` + `launchd`) |
+| GravityClaw | 08:00-24:00 CET | No molestar a Charly de noche |
+
+---
+
+### 3.4 Auto-Entrenamiento Nocturno
+
+De 00:00 a 08:00, cuando no hay tareas de Charly, RaspiClaw activa modo aprendizaje:
+
+```
+MODO NOCTURNO (RaspiClaw + Matrix):
+
+1. RaspiClaw decide QUÉ investigar:
+   → Temas donde el equipo ha fallado recientemente
+   → Tecnologías mencionadas por Charly que no dominan
+   → Tendencias tech relevantes para los proyectos en curso
+
+2. Asigna investigación a Matrix (barato):
+   → "Investiga cómo funciona la API de Stripe"
+   → "Busca mejores prácticas para CI/CD con GitHub Actions"
+
+3. Matrix investiga y crea skills nuevos
+   → youtube-automation.md
+   → stripe-integration.md
+   → github-actions-cicd.md
+
+4. Los sube a Supabase (category: 'skill')
+   → Al día siguiente, todo el equipo es más capaz
+
+Coste total: ~0 (Gemini Ultra + Kimi barato)
+```
+
+---
+
+### 3.5 Retrospectivas Semanales Automáticas
+
+Cada domingo, RaspiClaw genera un informe:
+
+```
+RETROSPECTIVA SEMANAL:
+
+📊 Resumen
+  - Tareas completadas: 15
+  - Tareas falladas: 2
+  - Skills nuevos creados: 3
+  - Errores registrados: 4
+
+🏆 Eficiencia por agente
+  - Maya: 5/5 completadas, especialidad código (100%)
+  - Matrix: 8/10 completadas, especialidad investigación (80%)
+  - GravityClaw: 3/3 notificaciones entregadas (100%)
+
+❌ Errores más comunes
+  - SSH timeout al VPS (3 veces) → regla creada: reintentar con backoff
+  - Docker permisos reset (2 veces) → regla: comprobar ExecStartPre
+
+💡 Sugerencias
+  - Considerar mover tareas de investigación de Matrix a RaspiClaw (más barato)
+  - Maya no se usó para testing, Matrix fue más eficiente en QA
+
+Se publica en:
+  → Supabase knowledge (category: 'retrospective')
+  → NotebookLM (notebook: 'Retrospectivas')
+  → Telegram de Charly (resumen corto)
+```
+
+---
+
+### 3.6 Skills Marketplace Interno
+
+Cuando un agente crea un skill:
+
+```
+Skill: youtube-automation.md
+  Creado por: Matrix
+  Fecha: 2026-02-23
+  Categoría: automation
+  Dificultad: media
+  Dependencias: YouTube API key, OAuth2
+  Usado por: Maya (1 vez), Matrix (2 veces)
+  Rating: ⭐⭐⭐⭐ (basado en éxito de tareas que lo usaron)
+```
+
+Los otros agentes lo "instalan" automáticamente cuando lo necesitan — lo leen de Supabase y lo aplican.
+
+---
+
+*Dime "continúa" para la Parte 4: Estado Actual, Bugs, y Fases de Implementación*
+
+---
+
+## Parte 4: Estado Actual y Roadmap de Implementación
+
+### 4.1 Lo que ya funciona ✅
+
+| Componente | Estado | Ubicación |
+|-----------|--------|-----------|
+| Supabase schema desplegado | ✅ 6 tablas, 4 agentes registrados | `fntlakfcfphbcztpbspt.supabase.co` |
+| Maya operativa en VPS | ✅ OpenClaw + Claude Code | VPS Hostinger |
+| Matrix operativo en VPS | ✅ OpenClaw, workspace-worker | VPS Hostinger |
+| Maka registrada en ecosistema | 🟡 Documentada, pendiente setup físico | Mac viejo (bare metal) |
+| GravityClaw operativo | ✅ Bot Telegram, SQLite, Pinecone | Mac local |
+| Anti-Gravity con 25+ skills | ✅ MCPs configurados | Mac (Antigravity app) |
+| GitHub repos creados | ✅ Charly103 + deepwbmayamatrix-ai | GitHub |
+| Pinecone configurado | ✅ Index `gravity-claw`, namespace `gravity-claw` | Pinecone cloud |
+| Skills supabase-brain | ✅ Escritos para Anti-Gravity + Maya/Matrix | `~/.agent/skills/` + `~/maya/skills/` |
+| Credenciales compartidas | ✅ `~/maya/.env.local` | Mac local |
+| ORQUESTADOR.md completo | ✅ 580 líneas, toda la config documentada | `~/ecosystem/docs/ORQUESTADOR.md` |
+
+### 4.2 Bugs conocidos que hay que arreglar ❌
+
+#### GravityClaw `supabase.ts` — 5 bugs de columnas
+
+| Línea | Código actual (mal) | Debería ser | Tabla |
+|-------|---------------------|-------------|-------|
+| ~175 | `agent: 'gravityclaw'` | `reported_by: 'gravityclaw'` | error_patterns |
+| ~178 | `description` | `error_description` | error_patterns |
+| ~205 | `agent: 'gravityclaw'` | `created_by: 'gravityclaw'` | knowledge |
+| ~250 | `agents?name=eq.gravityclaw` | `agents?id=eq.gravityclaw` | agents |
+| ~272 | `agent: 'gravityclaw'` | `agent_id: 'gravityclaw'` | agent_sessions |
+
+Columnas extra que no existen en el schema: `status` en agent_sessions, `errors_count` (→ `errors_encountered`).
+
+#### GravityClaw integración — no conectado
+
+- `index.ts` no importa `initSupabase()` → Supabase nunca se inicializa
+- `heartbeat.ts` no pollea tareas → GravityClaw no recibe tareas del ecosistema
+- Sin estos cambios, GravityClaw es un bot standalone, no parte del equipo
+
+#### VPS — credenciales Supabase ausentes
+
+- `/docker/openclaw-pyi4/.env` no tiene `SUPABASE_URL` ni `SUPABASE_SERVICE_KEY`
+- Sin esto, Maya y Matrix no pueden conectarse al cerebro compartido
+- El skill `supabase-brain` está escrito pero no deployado al VPS
+
+---
+
+### 4.3 Roadmap de Implementación
+
+#### Fase 1: Conectar a todos al cerebro 🔴 PRIORIDAD MÁXIMA
+
+Sin esto, nada del plan funciona. Es como poner teléfonos en la oficina.
+
+| Paso | Qué | Quién ejecuta | Dependencias |
+|------|-----|--------------|-------------|
+| 1.1 | Arreglar 5 bugs en `supabase.ts` | Anti-Gravity | Ninguna |
+| 1.2 | Importar `initSupabase()` en `index.ts` | Anti-Gravity | 1.1 |
+| 1.3 | Añadir polling de tareas en `heartbeat.ts` | Anti-Gravity | 1.1 |
+| 1.4 | Verificar TypeScript compila sin errores | Anti-Gravity | 1.2, 1.3 |
+| 1.5 | Añadir `SUPABASE_URL` + key al VPS `.env` | Anti-Gravity (SSH) | Ninguna |
+| 1.6 | Copiar skill supabase-brain al VPS | Anti-Gravity (SSH) | 1.5 |
+| 1.7 | Restart Maya/Matrix + `/reset` en Telegram | Charly o Anti-Gravity | 1.6 |
+| 1.8 | Verificar: Maya lee tabla `agents` | Maya | 1.7 |
+| 1.9 | Verificar: crear tarea Anti-Gravity → Maya la ve | Anti-Gravity + Maya | 1.8 |
+| 1.10 | Deploy GravityClaw actualizado | Charly (Railway) | 1.4 |
+
+**Verificación**: Crear tarea en Supabase → cada agente la puede leer → completar → registro en Supabase.
+
+---
+
+#### Fase 2: Migrar conocimiento existente 🟡
+
+Pasar la información que ya existe a la base compartida para que no se pierda.
+
+| Paso | Qué | Quién |
+|------|-----|-------|
+| 2.1 | Migrar `error-journal.md` → tabla `error_patterns` | Anti-Gravity |
+| 2.2 | Migrar decisiones de ORQUESTADOR.md → tabla `decisions` | Anti-Gravity |
+| 2.3 | Crear `HEARTBEAT.md` para Maya con "revisa Supabase" | Anti-Gravity |
+| 2.4 | Crear `HEARTBEAT.md` para Matrix con "revisa Supabase" | Anti-Gravity |
+| 2.5 | Organizar carpeta `~/maya/` (docs, scripts, skills, config) | Anti-Gravity |
+
+---
+
+#### Fase 3: Montar RaspiClaw 🟡
+
+| Paso | Qué | Quién |
+|------|-----|-------|
+| 3.1 | Instalar OS en Raspberry Pi | Charly |
+| 3.2 | Obtener API key Gemini (aistudio.google.com/apikey) | Charly |
+| 3.3 | Decidir framework: OpenClaw, custom bot, o script Python | Anti-Gravity + Charly |
+| 3.4 | Implementar heartbeat macro (revisa Supabase cada 5min) | Anti-Gravity/Maya |
+| 3.5 | Crear bot Telegram @RaspiClaw_bot | Charly (BotFather) |
+| 3.6 | Implementar reglas de delegación (sección 3.1) | Maya |
+| 3.7 | Conectar a Supabase + Pinecone + Telegram | Maya |
+| 3.8 | Test: tarea sin asignar → RaspiClaw la asigna automáticamente | Todos |
+
+---
+
+#### Fase 4: Pipelines y delegación 🟢
+
+| Paso | Qué |
+|------|-----|
+| 4.1 | Implementar campo `parent_task` y lógica de pipeline en RaspiClaw |
+| 4.2 | Implementar cadena de fallback (X no puede → Y → Z → Charly) |
+| 4.3 | Test: pipeline completo "crear web" multi-agente |
+| 4.4 | Registrar cadenas de delegación → aprender quién es mejor |
+
+---
+
+#### Fase 5: Pinecone compartido + NotebookLM 🟢
+
+| Paso | Qué |
+|------|-----|
+| 5.1 | Crear namespace `ecosystem` en Pinecone |
+| 5.2 | Dar acceso a Maya/Matrix (API key en VPS .env) |
+| 5.3 | Implementar "subir a ecosystem" cuando se aprende algo importante |
+| 5.4 | Crear notebooks en NotebookLM por temática |
+| 5.5 | Implementar flujo: Supabase knowledge → NotebookLM → skills |
+
+---
+
+#### Fase 6: Auto-entrenamiento y retrospectivas 🔵
+
+| Paso | Qué |
+|------|-----|
+| 6.1 | Implementar modo nocturno en RaspiClaw (00:00-08:00) |
+| 6.2 | Implementar selección inteligente de temas a investigar |
+| 6.3 | Implementar retrospectivas semanales automáticas |
+| 6.4 | Implementar skills marketplace con ratings |
+
+---
+
+#### Fase 7: Maka — Agente Desktop en Mac viejo 🟡
+
+| Paso | Qué | Quién |
+|------|-----|-------|
+| 7.1 | Crear directorio `~/maka/` con SOUL.md, MEMORY.md, IDENTITY.md, AGENTS.md | Anti-Gravity |
+| 7.2 | Crear bot Telegram para Maka en @BotFather | Charly |
+| 7.3 | Instalar Claude Code CLI en Mac viejo + configurar token OAuth Max | Anti-Gravity |
+| 7.4 | Instalar OpenClaw en Mac viejo (bare metal, sin Docker) | Anti-Gravity |
+| 7.5 | Configurar claude-max proxy local (reutilizar token OAuth o generar nuevo) | Anti-Gravity |
+| 7.6 | Configurar `pmset sleep 0` + `launchd` para always-on | Anti-Gravity |
+| 7.7 | Crear repo GitHub para Maka | Anti-Gravity |
+| 7.8 | Conectar Maka al cerebro compartido (Supabase + Pinecone) | Anti-Gravity |
+| 7.9 | Configurar acceso browser nativo (ventaja principal) | Anti-Gravity |
+| 7.10 | Explorar interacción directa Maka ↔ Anti-Gravity (filesystem compartido) | Anti-Gravity |
+| 7.11 | Verificar: Maka lee/escribe en Supabase, recibe tareas de RaspiClaw | Todos |
+
+---
+
+### 4.4 Diagrama temporal estimado
+
+```
+Semana 1: Fase 1 (conectar todos al cerebro)
+Semana 2: Fase 2 (migrar conocimiento) + comprar/configurar Raspberry
+Semana 3-4: Fase 3 (RaspiClaw operativo)
+Semana 5-6: Fase 4 (pipelines y delegación)
+Semana 7-8: Fase 5 (Pinecone + NotebookLM)
+Mes 3+: Fases 6-7 (auto-entrenamiento, MacClaw)
+```
+
+---
+
+> [!IMPORTANT]
+> Este es el plan definitivo completo. No se ejecuta nada hasta que Charly dé el OK fase por fase. Cada fase requiere aprobación explícita antes de comenzar.
+
+
+
