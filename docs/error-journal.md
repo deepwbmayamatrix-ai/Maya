@@ -168,9 +168,9 @@
 - **Lección**: Antes de documentar "cómo funciona algo", LEER EL CÓDIGO FUENTE del proxy y verificar con pruebas reales. Nunca documentar arquitectura asumida.
 
 ### 020 — [CONFIG] claude-proxy `code -13` — Procedimiento rápido de reparación
-- **Fecha**: 2026-02-20
+- **Fecha**: 2026-02-20 (actualizado 2026-02-24)
 - **Contexto**: Maya deja de responder con `Process exited with code -13`. Ocurre periódicamente.
-- **Causa**: El proxy pierde la conexión (SIGPIPE) por sesión larga, zombie process, o reset del container.
+- **Causas conocidas**: (1) zombie process tras restart, (2) reset del container, (3) auth files conflictivos, (4) **token OAuth expirado** (ver #026).
 - **Fix rápido**: 
   ```bash
   ssh root@46.202.171.91 "systemctl stop claude-proxy && sleep 2 && systemctl start claude-proxy"
@@ -185,6 +185,7 @@
   2. `docker logs --tail 10 openclaw-pyi4-openclaw-1` — ¿ambos bots Telegram activos?
   3. Verificar permisos: `ls -la /docker/openclaw-pyi4/data/.openclaw/` — ¿tiene `o+rx`?
   4. Verificar auth files: `ls /opt/claude-proxy/.openclaw/agents/main/agent/` — ¿hay `auth.json` suelto? Si sí, mover a backup (ver #014)
+  5. **Verificar auth**: `sudo -u claude-proxy HOME=/opt/claude-proxy claude auth status` — si `loggedIn: false` → renovar token (ver #026)
 
 ### 021 — [ARQUITECTURA] OpenClaw multi-agent session path traversal bug (v2026.2.12)
 - **Fecha**: 2026-02-19
@@ -236,7 +237,7 @@
 | Instalar software que rompe deps del sistema | 1 vez | NUNCA brew install en containers sin verificar deps |
 | No verificar E2E tras desplegar | 1 vez | Siempre probar el camino completo |
 | docker restart vs force-recreate | 1 vez | env changes → force-recreate |
-| claude-proxy code -13 periódico | **recurrente** | `stop + sleep 2 + start` (NUNCA restart). Ver #017, #020 |
+| claude-proxy code -13 periódico | **recurrente** | `stop + sleep 2 + start` (NUNCA restart). Verificar token OAuth si persiste. Ver #017, #020, #026 |
 | Multi-agent session path error | 1 vez | Actualizar OpenClaw + verificar config multi-account. Ver #021 |
 | Maya edita openclaw.json → gateway crash | **3 veces** | REGLA #9 en CLAUDE.md: Maya y Matrix **NUNCA** editan config. Solo Anti-Gravity. Ver #022 |
 | Session locks tras crash | **recurrente** | `find .../agents/ -name "*.lock" -delete` + restart gateway |
@@ -279,3 +280,28 @@
 - **Error**: Estos keys son válidos en `agents.defaults.subagents` pero NO en `agents.list[].subagents` individual. OpenClaw rechazaba el config reload silenciosamente con `Unrecognized keys` en logs.
 - **Impacto**: Todos los cambios de config posteriores (incluyendo fixes de identidad) NO se aplicaban porque el reload fallaba.
 - **Regla**: Después de modificar `openclaw.json`, SIEMPRE verificar logs con `docker logs --tail 5 openclaw-pyi4-openclaw-1` para confirmar que el reload fue aceptado. El error `Unrecognized keys` es silencioso — no crashea, simplemente ignora el cambio.
+
+### 026 — [CONFIG] Token OAuth expirado en claude-proxy → code -13 persistente
+- **Fecha**: 2026-02-24
+- **Contexto**: Maya dejó de responder con `Process exited with code -13` en todos los mensajes. El `stop + start` habitual no solucionaba nada.
+- **Error**: El token OAuth de Claude Max (`CLAUDE_CODE_OAUTH_TOKEN` en `/etc/claude-proxy/env`) había expirado. El proxy arrancaba OK (health check `{"status":"ok"}`) pero cada subprocess de Claude CLI moría inmediatamente porque `claude auth status` devolvía `loggedIn: false`.
+- **Diagnóstico clave**: `ssh root@VPS "sudo -u claude-proxy HOME=/opt/claude-proxy claude auth status"` → `loggedIn: false` confirma token expirado.
+- **Fix**: Extraer credenciales completas (access + refresh token) del Keychain local de Mac: `security find-generic-password -s "Claude Code-credentials" -w`. Escribir AMBOS tokens en `/opt/claude-proxy/.claude/credentials.json` con permisos `600 claude-proxy:claude-proxy`. El refresh token permite que Claude CLI renueve el access token automáticamente.
+- **Fix rápido**:
+  ```bash
+  # 1. En Mac local: obtener credenciales
+  security find-generic-password -s "Claude Code-credentials" -w
+  # 2. En VPS: escribir credentials.json con access + refresh token
+  ssh root@VPS "cat > /opt/claude-proxy/.claude/credentials.json << 'EOF'
+  {contenido JSON completo con accessToken Y refreshToken}
+  EOF
+  chmod 600 /opt/claude-proxy/.claude/credentials.json
+  chown claude-proxy:claude-proxy /opt/claude-proxy/.claude/credentials.json"
+  # 3. También actualizar el env var
+  ssh root@VPS "sed -i 's/CLAUDE_CODE_OAUTH_TOKEN=.*/CLAUDE_CODE_OAUTH_TOKEN=<nuevo_access_token>/' /etc/claude-proxy/env"
+  # 4. Restart correcto
+  ssh root@VPS "systemctl stop claude-proxy && sleep 2 && systemctl start claude-proxy"
+  ```
+- **Regla**: Cuando `code -13` persiste tras `stop+start`, verificar `claude auth status`. Si `loggedIn: false` → el token expiró. Renovar con credenciales completas (incluir refresh token para auto-renovación). El access token solo dura horas; el refresh token es de larga duración.
+- **Meta-regla nueva (#15)**: El proxy necesita AMBOS tokens (access + refresh) en `credentials.json`. Solo poner el access token en el env var es un fix temporal que caduca en horas.
+- **Impacto**: Maya inoperativa ~30 minutos hasta diagnosticar que era token expirado y no zombie process.
