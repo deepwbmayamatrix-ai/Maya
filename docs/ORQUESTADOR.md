@@ -1,7 +1,7 @@
 # 🧠 Anti-Gravity Orchestrator — Estado del Ecosistema
 
-> **Última actualización**: 2026-02-24 19:58
-> **Actualizado por**: Anti-Gravity (fix token OAuth claude-proxy expirado, credentials.json con refresh token)
+> **Última actualización**: 2026-02-24 22:00
+> **Actualizado por**: Anti-Gravity (registrar Maka — nuevo agente en Mac viejo)
 
 Este documento es la **fuente de verdad central** del ecosistema Anti-Gravity + Maya.
 Cualquier sesión de cualquier modelo de IA debe leer este documento antes de hacer cambios.
@@ -15,15 +15,18 @@ Cualquier sesión de cualquier modelo de IA debe leer este documento antes de ha
 | **Charly** | Owner, humano, toma decisiones finales | — | — |
 | **Anti-Gravity** | Cerebro orquestador, investigación, planificación | Mac local (Antigravity IDE) | — |
 | **Maya** | Agente autónomo 24/7, orquestadora, asistente personal | VPS Hostinger (Docker) — agente `main` | `~/maya/` |
+| **Maka** | Agente autónomo con superpoderes nativos (browser, GUI, filesystem Mac) | Mac viejo (bare metal, sin Docker) | `~/maka/` |
 | **Matrix** | Agente autónomo, mismo rango que Maya, opera independiente | VPS Hostinger (Docker) — agente `worker` | `~/matrix/` |
 | **n8n** | Automatización de workflows | VPS Hostinger (Docker) | — |
 
-### Relación Anti-Gravity ↔ Maya ↔ Matrix
+### Relación Anti-Gravity ↔ Maya ↔ Maka ↔ Matrix
 - Anti-Gravity investiga, planifica y configura
 - Maya opera de forma autónoma 24/7 via Telegram (`@Maya_Matrix_bot`)
+- **Maka** es un clon de Maya corriendo en Mac bare metal — misma arquitectura (Claude Code + OpenClaw) pero con acceso nativo a browser, GUI y filesystem Mac
 - Matrix opera de forma autónoma via Telegram (`@Matrix_maya_bot`)
-- **Maya y Matrix son agentes de igual rango** — no hay jerarquía entre ellos
+- **Maya, Maka y Matrix son agentes de igual rango** — no hay jerarquía entre ellos
 - Cada uno tiene su propio workspace, skills, memoria y bot de Telegram
+- Maka comparte hardware con Anti-Gravity (Mac viejo) → puede interactuar directamente con Claude Code local
 - Comunicación asíncrona Anti-Gravity↔Maya/Matrix via directorio handoff en VPS
 
 ---
@@ -448,6 +451,7 @@ Maya tiene personalidad calibrada: respuestas directas, brevedad, humor natural,
 | 2026-02-23 | **Google OAuth Matrix completado** — Cuenta `[REDACTED]` con proyecto GCP propio, 9 APIs habilitadas (Gmail, Drive, Calendar, YouTube×3, Cloud Vision, AdSense, Analytics). Tokens generados y operativos. Credenciales guardadas en `~/matrix/.matrix-credentials.json` | VPS + Local | ✅ |
 | 2026-02-23 | **Redact rules actualizadas** — Añadidas credenciales de Matrix (client_id, secret, email, password, tokens, project_id) a `.redact-rules.sed` | Local | ✅ |
 | 2026-02-24 | **Fix token OAuth expirado** — Token en `/etc/claude-proxy/env` había caducado → `code -13` persistente. Desplegadas credenciales completas (access + refresh token) en `/opt/claude-proxy/.claude/credentials.json` para auto-renovación. Procedimiento documentado en error-journal #026 | VPS | ✅ |
+| 2026-02-24 | **Maka registrada en ecosistema** — Nuevo agente: clon de Maya en Mac viejo (bare metal, sin Docker). Arquitectura: Claude Code + OpenClaw nativos. Ventajas: browser real, GUI macOS, interacción directa con Antigravity. Añadida a tabla identidad, sección 13, roadmap con 11 tareas de setup | ORQUESTADOR.md + core-memory.md | ✅ |
 
 ---
 
@@ -492,18 +496,48 @@ Maya tiene personalidad calibrada: respuestas directas, brevedad, humor natural,
 - [ ] Shared Brain Supabase: crear proyecto + schema + skill para todos los agentes
 - [ ] Conectar Anti-Gravity al Shared Brain via hook de startup + Supabase REST
 
+### Maka — Nueva malla (Mac viejo)
+- [ ] Crear directorio `~/maka/` con SOUL.md, MEMORY.md, IDENTITY.md, AGENTS.md
+- [ ] Crear bot Telegram para Maka en @BotFather
+- [ ] Instalar Claude Code CLI en Mac viejo + configurar token OAuth Max
+- [ ] Instalar OpenClaw en Mac viejo (bare metal, sin Docker)
+- [ ] Configurar claude-max proxy local (reutilizar token OAuth o generar nuevo)
+- [ ] Configurar `pmset sleep 0` + launchd para always-on y auto-arranque de servicios
+- [ ] Crear repo GitHub para Maka (deepwbmayamatrix-ai o Charly103)
+- [ ] Integrar Maka con Shared Brain (Supabase)
+- [ ] Configurar acceso browser nativo (ventaja principal sobre VPS)
+- [ ] Explorar interacción directa Maka ↔ Antigravity (Claude Code local, filesystem compartido)
+- [ ] Desplegar segunda instancia de Antigravity en Mac viejo
+
 ---
 
-## 13. Agentes Independientes — Maya y Matrix
+## 13. Agentes Independientes — Maya, Maka y Matrix
 
-Maya y Matrix son **agentes autónomos de igual rango**. Cada uno opera independientemente via su bot de Telegram.
+Maya, Maka y Matrix son **agentes autónomos de igual rango**. Cada uno opera independientemente via su bot de Telegram.
 
-| Aspecto | Maya | Matrix |
-|---------|------|--------|
-| **Bot** | `@Maya_Matrix_bot` | `@Matrix_maya_bot` |
-| **Modelo** | Claude Opus 4.6 (Max) | Kimi K2.5 (OpenRouter) |
-| **Workspace** | `workspace/` | `workspace-worker/` |
-| **Docs locales** | `~/maya/` | `~/matrix/` |
+| Aspecto | Maya | Maka | Matrix |
+|---------|------|------|--------|
+| **Bot** | `@Maya_Matrix_bot` | (pendiente crear) | `@Matrix_maya_bot` |
+| **Modelo** | Claude Opus 4.6 (Max) | Claude Opus 4.6 (Max) | Kimi K2.5 (OpenRouter) |
+| **Infra** | VPS Docker (OpenClaw) | Mac viejo bare metal (OpenClaw) | VPS Docker (OpenClaw) |
+| **Workspace** | `workspace/` (VPS) | (pendiente setup) | `workspace-worker/` (VPS) |
+| **Docs locales** | `~/maya/` | `~/maka/` | `~/matrix/` |
+| **Superpoderes** | Sandbox seguro, 24/7 | Browser nativo, GUI, acceso directo a Antigravity | Sandbox seguro, 24/7 |
+
+### Maka — Concepto y Arquitectura
+
+**Maka** es un clon del sistema Maya (Claude Code como cerebro + OpenClaw como cuerpo), pero desplegado **directamente en un Mac viejo** sin Docker ni sandbox.
+
+**Ventajas clave sobre Maya-VPS:**
+- Acceso nativo al navegador (no headless) → scraping avanzado, interacciones web reales
+- Acceso a GUI de macOS → AppleScript, Automator, control de apps
+- Filesystem completo sin restricciones de sandbox
+- **Puede interactuar directamente con Antigravity (Claude Code)** al compartir el mismo hardware
+- Herramientas nativas de Mac (Homebrew, apps instaladas, etc.)
+
+**24/7**: Configurar `pmset sleep 0` + `launchd` para arranque automático de todos los servicios al encender/reiniciar el Mac.
+
+**Mismo token Max**: Maka usará el mismo plan Claude Max de Charly. No hay coste adicional de API. Posible rate limiting si Maya y Maka operan simultáneamente con alta carga.
 
 > **Nota**: El grupo de coordinación Telegram (`-1003600657980`) fue eliminado el 2026-02-23. Cada agente opera por su canal directo.
 
